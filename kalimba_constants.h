@@ -1,0 +1,64 @@
+#ifndef KALIMBA_H__
+#define KALIMBA_H__
+
+
+#define VCP_1MIC_PS_BASE    0x2263 /* PSKEY_DSP11 */
+#define VCP_READY_MSG       0x1000
+#define VCP_LOADPARAMS_MSG  0x1012
+#define VCP_CODEC_MSG       0x1006
+
+#define CVC_SECPASSED_MSG   0x100c
+#define CVC_SECFAILED_MSG   0x1013
+#define SET_SCOTYPE_MSG     0x100d
+#define CVC_LOADPARAMS_MSG  0x1012
+#define CVC_LOADPERSIST_MSG 0x1014
+#define CVC_LOADPERSIST_RESP 0x1015
+#define CVC_LOAD_INDEX      0x1067
+
+#define MSG_WARP_VALUES     0x1025
+
+#define CVC_1MIC_PS_BASE 0x2263    /* PSKEY_DSP11 */
+#define CVC_SR_NB        0
+
+
+#define CVC_AUDIO_CONFIG_MSG (0x2000)
+#define LINK_ENCODING_CVSD (0)
+#define LINK_ENCODING_USB  (3)
+#define AUDIO_CODEC_CVSD   (1)
+#define AUDIO_CONFIG_SCO_RATE (8 * 8) /* 8kHz */
+
+#define RATE_MATCHING_HARDWARE (1<<0)
+#define RATE_MATCHING_SOFTWARE (1<<1)
+#define CVC_INTERFACE_ANALOG (0)
+#define CVC_INTERFACE_I2S    (1)
+#define MESSAGE_SET_ADCDAC_SAMPLE_RATE_MESSAGE_ID (0x1070)
+
+
+#define CVC_SETMODE_MSG (0x1001)
+#define SYSMODE_HFK     (1)
+#define SYSMODE_PSTHRGH (3)
+#define SYSMODE_LPBACK  (5)
+#define CALLST_DISCONNECTED (0)
+#define CALLST_CONNECTED    (1)
+
+#define CVC_VOLUME_MSG      (0x1002)
+
+#define SET_LEVELS_MSG      (0x2001)
+
+#define KALIMBA_PORT_CHAN_A_8KHZ_IN        (0)
+#define KALIMBA_PORT_CHAN_A_8KHZ_OUT       (0)
+#define KALIMBA_PORT_CHAN_A_24KHZ_IN       (1)
+#define KALIMBA_PORT_CHAN_A_24KHZ_OUT      (1)
+
+#define KALIMBA_PORT_CHAN_B_8KHZ_IN        (2)
+#define KALIMBA_PORT_CHAN_B_8KHZ_OUT       (2)
+#define KALIMBA_PORT_CHAN_B_24KHZ_IN       (3)
+#define KALIMBA_PORT_CHAN_B_24KHZ_OUT      (3)
+
+
+#define KALIMBA_PORT_CHAN_C_8KHZ_IN        (4)
+#define KALIMBA_PORT_CHAN_C_8KHZ_OUT       (4)
+#define KALIMBA_PORT_CHAN_C_24KHZ_IN       (5)
+#define KALIMBA_PORT_CHAN_C_24KHZ_OUT      (5)
+
+#endif

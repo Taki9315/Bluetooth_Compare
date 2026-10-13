@@ -1,0 +1,296 @@
+diff --git a/my_second_dsp_app/bluetooth_manager.c b/my_second_dsp_app/bluetooth_manager.c
+index 06b35d7..abba14f 100755
+--- a/my_second_dsp_app/bluetooth_manager.c
++++ b/my_second_dsp_app/bluetooth_manager.c
+@@ -9,6 +9,7 @@
+ 
+ #include "config.h"
+ #include "audio_manager.h"
++#include "main.h"
+ 
+ 
+ /* Uncomment this to enable logging in this file */
+@@ -154,6 +155,7 @@ static const uint8
+         0x09, DATA_EL_UINT_16(DEVICE_ID_VENDOR_ID_SOURCE)
+ };
+ 
++
+ /* TODO - #12849: Check this code and the record/defines above. */
+ static void
+ bt_init_device_id_profile(void)
+@@ -696,6 +698,7 @@ connection_msg_handler(Task task, MessageId id, Message message)
+     case CL_SM_AUTHENTICATE_CFM:
+         /* 0x5022 */
+         LOG_DEBUG(("CL_SM_AUTHENTICATE_CFM\n"));
++        main_bluetooth_callback(MAIN_BT_CB_PAIRED);
+         break;
+ 
+     case CL_SM_SECURITY_LEVEL_CFM:
+diff --git a/my_second_dsp_app/main.c b/my_second_dsp_app/main.c
+index aecaf2c..fa9c1a0 100755
+--- a/my_second_dsp_app/main.c
++++ b/my_second_dsp_app/main.c
+@@ -26,6 +26,8 @@
+ #include "config.h"
+ #include "kalimba_constants.h"
+ 
++#include "main.h"
++
+ /* Uncomment this to enable logging in this file */
+ /* #define DEBUG_ENABLED */
+ #include "log.h"
+@@ -109,6 +111,11 @@
+ #define PIO_inVOLUME_DEFAULT2  15
+ /* 9 = 0, 10 = 3db, 11=6, 12 = 9db */
+ 
++/** Blueack pin high delay in ms. */
++#define VC_BLUEACK_DELAY       (90)
++
++/** Blueack PIO mask. */
++#define VC_BLUEACK_PIO_MASK    (1 << 0)
+ 
+ 
+ /** Bitflag to indicate that a sync is in progress. */
+@@ -121,6 +128,10 @@
+ /* Globals */
+ TaskData KalVCPTask;
+ TaskData PioTask;
++TaskData BlueackTask;
++
++/** Waiting to send a blueack response if pairing is successful. */
++static bool waiting_for_blueack_response = FALSE;
+ 
+ 
+ /* Typedefs */
+@@ -134,6 +145,59 @@ typedef struct
+ } KAL_MESSAGE;
+ 
+ 
++/** 
++ * Set blueack PIO high or low
++ *
++ * @param high  If @c TRUE set the blueack PIO high, else set it to low.
++ */
++static void
++set_blueack_pio(bool high)
++{
++    if (high)
++    {
++        PioSet32(VC_BLUEACK_PIO_MASK, VC_BLUEACK_PIO_MASK);
++        PioSetDir32(VC_BLUEACK_PIO_MASK, VC_BLUEACK_PIO_MASK);
++    }
++    else
++    {
++        PioSetDir32(VC_BLUEACK_PIO_MASK, 0); 
++        PioSet32(VC_BLUEACK_PIO_MASK, 0);
++    }
++}
++
++
++/**
++ * Blueack task handler
++ *
++ * @param task      The task the message is associated with.
++ * @param id        The message ID.
++ * @param message   The message data.
++ */
++static void
++blueack_handler(Task task, MessageId id, Message payload)
++{
++    LOG_DEBUG(("%s\r\n", __FUNCTION__));
++    set_blueack_pio(FALSE);
++    
++    UNUSED(task);
++    UNUSED(id);
++    UNUSED(payload);
++}
++
++
++/**
++ * Cancel blueack request.
++ */
++static void
++blueack_cancel(void)
++{
++    (void)MessageCancelAll(&BlueackTask, 0);
++    
++    set_blueack_pio(FALSE);    
++    waiting_for_blueack_response = FALSE;
++}
++
++
+ /* Handles PIO interface to control volumes */
+ static void PioControlHandler( Task t, MessageId id, Message payload )
+ {
+@@ -149,6 +213,8 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+     uint32_t pio_bits = PioGet32();
+     uint32_t pio_delta = pio_bits ^ old_pio_bits;
+     uint32_t pio_rising = pio_delta & pio_bits;
++    
++    UNUSED(blueack_cancel);
+ 
+     if ((pio_rising & BUTTON_TOGGLE_BLUETOOTH_MASK)
+         == BUTTON_TOGGLE_BLUETOOTH_MASK)
+@@ -197,7 +263,6 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+     bool  bit1_falling_edge = 0;
+     bool  bit3_falling_edge = 0;
+ 
+-    static bool transmit_mode = FALSE;
+     bool kalimba_update_required = FALSE;
+ 
+     bool config_update = FALSE;
+@@ -217,36 +282,7 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+     bit1_falling_edge = ((bit1_last == 1) && (bit1 == 0));  /* falling edge;*/
+     bit3_falling_edge = ((bit3_last == 1) && (bit3 == 0));  /* falling edge;*/
+ 
+-
+-    /*
+-     * If in transmission mode keep the output up to date and wait for PIO_7 to
+-     * be toggled to switch back to receive
+-     */
+-    if (transmit_mode)
+-    {
+-        /* If PIO_7 is toggled then set back to receiving mode */
+-        if (bit3_falling_edge)
+-        {
+-            /* Set PIO 8, 10, 14 and 15 back to input mode */
+-            PioSetDir32(VC_MASKB, 0x0000);
+-            PioSet32(VC_MASKB, VC_MASKB);
+-
+-            /* Disable transmit mode */
+-            transmit_mode = FALSE;
+-        }
+-        else
+-        {
+-            /* Send a response indicating if a sync is in progress or not */
+-            if (bluetooth_sync_in_progress())
+-                PioSet32(VC_MASKB, VC_SYNC_IN_PROGRESS);
+-            else
+-                PioSet32(VC_MASKB, VC_SYNC_NOT_IN_PROGRESS);
+-        }
+-        MessageSendLater(t, 0, 0, VC_DELAY);  /* Reschedule this function*/
+-        return;
+-    }
+-
+-
++ 
+     /*if bitside is high then doing side tone stuff else doing regular volume*/
+     if ((prev_pio_bits & VC_MASKB) == VC_side)
+     {
+@@ -341,6 +377,7 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+         if (bit3_falling_edge)  /* falling edge*/
+         {
+             bluetooth_manager_source_mode_sync(FALSE);
++            blueack_cancel();
+         }
+     }
+     else if ((prev_pio_bits & VC_MASKB) == VC_bypk)     /*VC_bypk   0x4100   if vc_maskb = C5 when 04100 then use VC_xxx bypass kalimba main channel
+@@ -496,6 +533,7 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+         if (bit3_falling_edge)  /* falling edge*/
+         {
+             bluetooth_manager_sink_mode_sync(FALSE);
++            blueack_cancel();
+         }
+     }
+ 
+@@ -523,7 +561,7 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+             kalimba_update_required = TRUE;
+         }
+ 
+-        /* Set to sink (Headset) mode based on pin 3 falling edge*/
++        /* Set to sink (Headset) mode based on pin 3 falling edge */
+         if (bit3_falling_edge)  /* falling edge */
+         {
+             bluetooth_manager_set_mode(BLUETOOTH_MODE_SINK);
+@@ -532,13 +570,10 @@ static void PioControlHandler( Task t, MessageId id, Message payload )
+     }
+     else if ((prev_pio_bits & VC_MASKB) == VC_blueack)
+     {
++        /* Update blueack waiting state when PIO6 is toggled */
+         if  (bit1_falling_edge)
+         {
+-            /*
+-             * If PIO_6 is toggled then set PIO 8, 10, 14 and 15 to output mode
+-             */
+-            PioSetDir32(VC_MASKB, VC_MASKB);
+-            transmit_mode = TRUE;
++            waiting_for_blueack_response = TRUE;
+         }
+     }
+ 
+@@ -764,6 +799,21 @@ load_audio_config(void)
+ }
+ 
+ 
++void
++main_bluetooth_callback(main_bt_cb_events_t event)
++{
++    LOG_DEBUG(("Bluetooth event %u\n", event));
++   
++    if (event == MAIN_BT_CB_PAIRED)
++    {
++        set_blueack_pio(TRUE);
++
++        MessageSendLater(&BlueackTask, 0, 0, VC_BLUEACK_DELAY);
++        waiting_for_blueack_response = FALSE;
++    }
++}
++
++
+ #define CONFIG_DSP_BASE (50)
+ #define CONFIG_DSP(x) (CONFIG_DSP_BASE + (x))
+ #define CONFIG_DSP_SESSION_KEY (CONFIG_DSP(49))
+@@ -801,6 +851,11 @@ int main(void)
+     /* Schedule first message/task for volume control */
+     PioTask.handler = PioControlHandler;
+     MessageSend( &PioTask, 0 , 0 );
++    
++    /* Setup Blueack task hander and init state */
++    BlueackTask.handler = blueack_handler;
++    set_blueack_pio(FALSE);
++    waiting_for_blueack_response = FALSE;
+ 
+     /* Remain in MessageLoop (handles messages) */
+     MessageLoop();
+diff --git a/my_second_dsp_app/main.h b/my_second_dsp_app/main.h
+new file mode 100644
+index 0000000..8c42f81
+--- /dev/null
++++ b/my_second_dsp_app/main.h
+@@ -0,0 +1,24 @@
++#ifndef MAIN_H__
++#define MAIN_H__
++
++
++/**
++ * Bluetooth events to indicate to main.
++ */
++typedef enum main_bt_cb_events_t
++{
++    /** Device paired. */
++    MAIN_BT_CB_PAIRED
++} main_bt_cb_events_t;
++
++
++/**
++ * Called when a Bluetooth event occurs that the main application needs to be
++ * notified about.
++ *
++ * @param event     The event code for the Bluetooth event that just occured.
++ */
++extern void
++main_bluetooth_callback(main_bt_cb_events_t event);
++
++#endif
+diff --git a/my_second_dsp_app/mutlivoice_vcp.xip b/my_second_dsp_app/mutlivoice_vcp.xip
+index aa740bb..57c23bf 100755
+--- a/my_second_dsp_app/mutlivoice_vcp.xip
++++ b/my_second_dsp_app/mutlivoice_vcp.xip
+@@ -61,6 +61,7 @@
+   <file path="config_private.h" />
+   <file path="kalimba_constants.h" />
+   <file path="audio_manager.h" />
++  <file path="main.h" />
+  </folder>
+  <folder name="C Files" >
+   <extension name="c" />

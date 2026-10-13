@@ -1,0 +1,36 @@
+<project buildenvironment="{6907f3f0-0ed4-11d8-be02-0050dadfe87d}" buildenvironmentname="kalimba" executionenvironmentoption="BC03MM" buildenvironmentoption="" executionenvironmentname="kalimba bccmd" executionenvironment="{2ca81310-0ecd-11d8-be02-0050dadfe87d}" >
+ <folder name="VCP" >
+  <folder name="Header Files" >
+   <file path="vcp_8k_wired_to_24k_wired/VCP.h" />
+  </folder>
+ </folder>
+ <folder name="Header Files" >
+  <file path="vcp_8k_wired_to_24k_wired/tone_mix.h" />
+  <file path="vcp_8k_wired_to_24k_wired/one_mic_example.h" />
+  <file path="vcp_8k_wired_to_24k_wired/stream_copy.h" />
+  <file path="vcp_8k_wired_to_24k_wired/ports.h" />
+  <file path="vcp_8k_wired_to_24k_wired/stream_copy_passthrough.h" />
+ </folder>
+ <file path="vcp_8k_wired_to_24k_wired/tone_mix.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/one_mic_example_config.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/one_mic_example_system.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/stream_copy.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/stream_copy_passthrough.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/main.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/analog.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/i2s.asm" />
+ <file path="vcp_8k_wired_to_24k_wired/sco.asm" />
+ <properties currentconfiguration="Release" >
+  <configuration name="Release" >
+   <property key="BUILDENV" >0</property>
+   <property key="LIB_SET" >sdk</property>
+   <property key="bootstrap" >1</property>
+   <property key="debugtransport" >[LPT1]</property>
+   <property key="defines" >VCP_1MIC, ADK43</property>
+   <property key="hardware" >3</property>
+   <property key="libs" >core,frame_sync,cbops_multirate,plc100, math, vcp_1mic_cvsd</property>
+   <property key="output" ></property>
+   <property key="separator_flags" >0</property>
+  </configuration>
+ </properties>
+</project>

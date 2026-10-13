@@ -1,0 +1,95 @@
+<project buildenvironment="{84faf732-1340-4049-9094-244167adf571}" buildenvironmentname="vm" executionenvironmentoption="" buildenvironmentoption="" executionenvironmentname="vm" executionenvironment="{2b2c6868-a56e-4266-962a-cddf1c979343}" >
+ <folder name="aghfp" >
+  <file path="aghfp/aghfp.h" />
+  <file path="aghfp/aghfp_init.c" />
+  <file path="aghfp/aghfp_init.h" />
+  <file path="aghfp/aghfp_audio.c" />
+  <file path="aghfp/aghfp_audio_handler.c" />
+  <file path="aghfp/aghfp_audio_handler.h" />
+  <file path="aghfp/aghfp_call.c" />
+  <file path="aghfp/aghfp_call.h" />
+  <file path="aghfp/aghfp_call_manager.c" />
+  <file path="aghfp/aghfp_call_manager.h" />
+  <file path="aghfp/aghfp_common.c" />
+  <file path="aghfp/aghfp_common.h" />
+  <file path="aghfp/aghfp_csr_features.c" />
+  <file path="aghfp/aghfp_csr_features.h" />
+  <file path="aghfp/aghfp_hf_indicators.c" />
+  <file path="aghfp/aghfp_hf_indicators.h" />
+  <file path="aghfp/aghfp_hfp_service_record.h" />
+  <file path="aghfp/aghfp_hsp_service_record.h" />
+  <file path="aghfp/aghfp_indicators.c" />
+  <file path="aghfp/aghfp_indicators.h" />
+  <file path="aghfp/aghfp_init.h" />
+  <file path="aghfp/aghfp_link_manager.c" />
+  <file path="aghfp/aghfp_misc_handler.c" />
+  <file path="aghfp/aghfp_misc_handler.h" />
+  <file path="aghfp/aghfp_ok.c" />
+  <file path="aghfp/aghfp_ok.h" />
+  <file path="aghfp/aghfp_parse.c" />
+  <file path="aghfp/aghfp_parse.h" />
+  <file path="aghfp/aghfp_parse_handler.c" />
+  <file path="aghfp/aghfp_private.h" />
+  <file path="aghfp/aghfp_profile_handler.c" />
+  <file path="aghfp/aghfp_profile_handler.h" />
+  <file path="aghfp/aghfp_receive_data.c" />
+  <file path="aghfp/aghfp_receive_data.h" />
+  <file path="aghfp/aghfp_rfc.c" />
+  <file path="aghfp/aghfp_rfc.h" />
+  <file path="aghfp/aghfp_sdp.c" />
+  <file path="aghfp/aghfp_sdp.h" />
+  <file path="aghfp/aghfp_send_data.c" />
+  <file path="aghfp/aghfp_send_data.h" />
+  <file path="aghfp/aghfp_shim.c" />
+  <file path="aghfp/aghfp_shim.h" />
+  <file path="aghfp/aghfp_slc.c" />
+  <file path="aghfp/aghfp_slc_handler.c" />
+  <file path="aghfp/aghfp_slc_handler.h" />
+  <file path="aghfp/aghfp_user_data.c" />
+  <file path="aghfp/aghfp_user_data_handler.c" />
+  <file path="aghfp/aghfp_user_data_handler.h" />
+  <file path="aghfp/aghfp_wbs.c" />
+  <file path="aghfp/aghfp_wbs.h" />
+  <file path="aghfp/aghfp_wbs_handler.c" />
+  <file path="aghfp/aghfp_wbs_handler.h" />
+ </folder>
+ <folder name="Header Files" >
+  <file path="log.h" />
+  <file path="bluetooth_manager.h" />
+  <file path="bluetooth_private.h" />
+  <file path="config.h" />
+  <file path="config_private.h" />
+  <file path="kalimba_constants.h" />
+  <file path="audio_manager.h" />
+  <file path="main.h" />
+ </folder>
+ <folder name="C Files" >
+  <extension name="c" />
+  <file path="main.c" />
+  <file path="log.c" />
+  <file path="bluetooth_manager.c" />
+  <file path="bluetooth_hfp.c" />
+  <file path="bluetooth_aghfp.c" />
+  <file path="config_manager.c" />
+  <file path="audio_manager.c" />
+ </folder>
+ <file path="mutlivoice_vcp.psr" />
+ <properties currentconfiguration="Release" >
+  <configuration name="Release" >
+   <property key="buildMatch" >(file):(line):</property>
+   <property key="buildtransport" >4</property>
+   <property key="debug_print_enabled" >1</property>
+   <property key="debugtransport" >[SPITRANS=USB SPIPORT=0]</property>
+   <property key="defines" ></property>
+   <property key="faultalerts" >0</property>
+   <property key="firmware" >0</property>
+   <property key="libs" >connection,bdaddr,vmal,hfp,region,service,pblock</property>
+   <property key="messages" >0</property>
+   <property key="output" ></property>
+   <property key="pcvalue" >0</property>
+   <property key="primitives" >0</property>
+   <property key="stacksize" ></property>
+   <property key="timestamps" >0</property>
+  </configuration>
+ </properties>
+</project>
